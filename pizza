@@ -2,7 +2,7 @@
 
 using namespace std;
 
-struct Apple
+struct pizza
     char name[25];
     double d;
     double mass;
@@ -14,12 +14,12 @@ struct Apple
 };
 
 int main() {
-    Apple p;
+    pizza p;
     cout << "Enter company name:";
     cin.getline(p.name, 25);
-    cout << "Enter Apple diameter:";
+    cout << "Enter pizza diameter:";
     cin >> p.d;
-    cout << "Enter Apple mass:";
+    cout << "Enter pizza mass:";
     cin >> p.mass;
     p.print();
     return 0;
