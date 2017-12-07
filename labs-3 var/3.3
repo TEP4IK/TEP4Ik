@@ -1,0 +1,46 @@
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+
+const int N = 10;
+int A[N] = { 5, 0, 4, -3, -5, 7, 11, 0, -21,33};
+
+//Произведение элементов массива с четными номерами
+//Сумму элементов массива между первым и последним нулевыми элементами
+//Преобразовать массив так, чтобы сначала располагались все положительные (и 0), а потом - отрицательные
+
+int main()
+{
+	system("chcp 1251>nul");
+	for (int i = 0; i < N; i++) printf("%4d",A[i]);
+	printf("\n");
+	int product = 1;
+	for (int i = 0; i < N; i += 2) product *= A[i];
+	printf("Prod = %d\n",product);
+	int first = -1, last = -1;
+	for (int i = 0; i < N; i++)
+		if (A[i]==0)
+		{
+			if (first < 0) first = i;
+			last = i;
+		}
+	int sum = 0;
+	for (int i = first + 1; i < last - 1; i++) sum += A[i];
+	printf("Sum = %d\n", sum);
+	int k = 0;
+	while (k < N-1)
+	{
+		if (A[k] < 0 && A[k + 1]>=0)
+		{
+			int Temp = A[k]; A[k] = A[k + 1]; A[k + 1] = Temp;
+			k = 0;
+		}
+		else k++;
+	}
+
+	for (int i = 0; i < N; i++) printf("%4d", A[i]);
+	printf("\n");
+	system("pause");
+}
