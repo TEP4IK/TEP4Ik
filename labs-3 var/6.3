@@ -1,0 +1,59 @@
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+
+//В целочисленной прямоугольной матрице определить:
+//Количество столбцов, содержащих хоть один нулевой элемент
+//номер строки, в которой находится самая длинная серия одинаковых элементов
+
+const int N = 3;
+const int M = 4;
+int A[N][M] = {
+	1, 0, 3, 5,
+	4, 6, 6, 6,
+	0, 7, 7, 6
+};
+int main()
+{
+	system("chcp 1251>nul");
+	for (int n = 0; n < N; n++)
+	{
+		for (int m = 0; m < M; m++) printf("%4d", A[n][m]);
+			printf("\n");
+	}
+  int columns = 0;
+	for (int m = 0; m < M; m++)
+	{
+		int zero = 0;
+		for (int n = 0; n < N; n++)
+			if (A[n][m] == 0) zero++;
+		if (zero != 0) columns++;
+	}
+	printf("Columns %d\n",columns);
+	int row;
+	int best = 0;
+	for (int n = 0; n < N; n++) 
+	{
+		int count = 1;  
+		int a = A[n][0];
+		for (int m = 1; m < M; m++)
+			if (A[n][m] == a) 
+			{
+				count++; 
+				if (count > best) 
+				{
+					row = n; 
+					best = count; 
+				}
+			}
+			else
+			{
+				a = A[n][m]; 
+				count = 1; 
+			}
+	}
+	printf("Row %d\n", row);
+	system("pause");
+}
