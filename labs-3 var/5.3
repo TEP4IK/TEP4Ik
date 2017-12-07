@@ -1,0 +1,159 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+
+//Создать файл из <1000 символов, длина строки не больше 70 символов
+//с расширением .dat
+//Вывести на экран содержимое файла
+//По нажатию произвольной клавиши
+//выделяет слово, оканчивающееся на гласную букву
+//определяет общее количество слов в тексте, оканчивающихся на гласную
+
+char vowelA[] = "aeiouy";
+char vowelAH[] = "AEIOUY";
+char alphabetA[] = "abcdefghijklmnopqrtsuvwxyz";
+char alphabetAH[] = "ABCDEFGHIJKLMNOPQRTSUVWXYZ";
+char vowelR[] = "аеёиоуыэюя";
+char vowelRH[] = "АЕЁИУЫЭЮЯ";
+char alphabetR[] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+char alphabetRH[] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+
+bool instring(char c,char * s)
+{
+	for (unsigned int i = 0; i < strlen(s); i++)
+		if (c == s[i]) return true;
+	return false;
+}
+
+bool isvowel(char c)
+{
+	if (instring(c, vowelA)) return true;
+	if (instring(c, vowelAH)) return true;
+	if (instring(c, vowelR)) return true;
+	if (instring(c, vowelRH)) return true;
+	return false;
+}
+
+bool isalpha(char c)
+{
+	if (instring(c, alphabetA)) return true;
+	if (instring(c, alphabetAH)) return true;
+	if (instring(c, alphabetR)) return true;
+	if (instring(c, alphabetRH)) return true;
+	return false;
+}
+void setposition(int xpos, int ypos)
+{
+	COORD scrn;
+	HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
+	scrn.X = xpos; scrn.Y = ypos;
+	SetConsoleCursorPosition(hOuput, scrn);
+}
+void getposition(int& x, int& y)
+{
+	CONSOLE_SCREEN_BUFFER_INFO scrn;
+	HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(
+		hOuput,
+		&scrn
+		);
+	x = scrn.dwCursorPosition.X;
+	y = scrn.dwCursorPosition.Y;
+}
+void setTextAttr(WORD attr)
+{
+	HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hOuput, attr);
+}
+
+typedef struct WordInfo
+{
+	int line; 
+	int start; 
+	int len;
+	bool isvowel; 
+} WordInfo;
+
+const int Max = 70;
+char Text[100][Max]; 
+int Lines = 0; 
+WordInfo Word[1000];
+int Words = 0;
+
+int main()
+{
+	system("chcp 1251>nul");
+	FILE * F = fopen("Text.dat", "r");
+	if (!F)
+	{
+		printf("Нет файла Text.dat\n");
+		_getch();
+		return 1;
+	}
+	Lines = 0;
+	while (true)
+	{
+		fgets(Text[Lines], 70, F);
+		if (feof(F)) break;
+		for (unsigned int i = 0; i < strlen(Text[Lines]); i++)
+			if ((unsigned char)Text[Lines][i] < ' ') //unsigned - потому что русские буквы отрицательные
+			Text[Lines][i] = ' ';
+		Lines++;
+	}
+	char Command[] = "MODE CON: COLS=80 LINES=000";
+	int x = Lines+2;
+	if (x < 30) x = 30;
+	int p = strlen(Command) - 1;
+	Command[p--] = '0' + x % 10; x /= 10;
+	Command[p--] = '0' + x % 10; x /= 10;
+	Command[p--] = '0' + x % 10; x /= 10;
+	system(Command);
+	for (int l = 0; l < Lines; l++)
+	{
+		printf("%s\n", Text[l]);
+		char ww[Max];
+		int nw = 0;
+		for (unsigned int k = 0; k < strlen(Text[l]); k++)
+		{
+			if (isalpha(Text[l][k]))
+				ww[nw++] = Text[l][k]; 
+			else
+			if (nw!=0)
+			{
+				ww[nw] = 0;
+				Word[Words].len = nw;
+				Word[Words].start = k - nw  ;
+				Word[Words].line = l;
+				Word[Words].isvowel = isvowel(ww[nw - 1]);
+				nw = 0;
+				Words++;
+			}
+		}
+	} 
+	int Count = 0;
+	for (int w = 0; w < Words; w++)
+		if (Word[w].isvowel) Count++;
+	p=-1;
+	for (int i = 0; i < Count; i++)
+	{
+		do { p++;} while (!Word[p].isvowel);
+		setposition(Word[p].start, Word[p].line);
+		setTextAttr(0x70);
+		for (int k = 0; k < Word[p].len; k++)
+		  printf("%c",Text[Word[p].line][Word[p].start+k]);
+		if (_getch() == 27) break;
+		setposition(Word[p].start, Word[p].line);
+		setTextAttr(0x0F);
+		for (int k = 0; k < Word[p].len; k++)
+			printf("%c", Text[Word[p].line][Word[p].start + k]);
+	}
+	setposition(0, Lines);
+	setTextAttr(0x07);
+	printf("Всего заканчивающихся на гласную слов %d\n", Count);
+	system("pause");
+
+}
