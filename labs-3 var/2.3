@@ -1,0 +1,124 @@
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+
+//Составить программу, которая содержит текущую информацию о заявках на авиабилеты
+//Каждая заявка содержит
+//пункт назначения
+//номер рейса
+//фамилию пассажира
+//дату вылета
+
+typedef struct REIS {
+	int Number;
+	char Dest[32];
+	char FIO[32];
+	char Date[32];
+} REIS;
+
+typedef struct NODE
+{
+	REIS data;
+	NODE * next;
+} NODE;
+
+NODE * root = NULL;
+void Add(int Number, char * FIO, char * Dest, char * Date)
+{
+	NODE * newnode = new NODE();
+	newnode->data.Number = Number;
+	strcpy(newnode->data.FIO, FIO);
+	strcpy(newnode->data.Dest, Dest);
+	strcpy(newnode->data.Date, Date);
+  newnode->next = root;
+	root = newnode;
+}
+void Delete(int Number, char * FIO)
+{
+	NODE * curr = root;
+	NODE * prev = NULL;
+	while (curr)
+	{
+		if (curr->data.Number == Number && strcmp(FIO, curr->data.FIO) == 0)
+		{
+			if (!prev) root = curr->next; else prev->next = curr->next;
+			delete curr;
+			return;
+		}
+		prev = curr;
+		curr = curr->next;
+	}
+	printf("Нет такого\n");
+}
+void Print(int Number, char * Date)
+{
+	NODE * curr = root;
+	int count = 0;
+	while (curr)
+	{
+		if (Number==0 || Number==curr->data.Number)
+			if (Date[0]==0 || strcmp(Date, curr->data.Date)==0)
+			{
+				if  (count==0)
+					printf("%5s %20s %20s %20s \n","Номер","ФИО", "Куда", "Когда");
+				printf("%5d %20s %20s %20s \n",curr->data.Number, curr->data.FIO, curr->data.Dest, curr->data.Date);
+				count++;
+			}
+		curr = curr->next;
+	}
+	if (count == 0) printf("Нет таких\n");
+}
+void Help()
+{
+	printf("1 - Добавить\n");
+	printf("2 - Удалить\n");
+	printf("3 - Вывести по шаблону\n");
+	printf("4 - Вывести все\n");
+	printf("9 - Закончить\n");
+}
+int main()
+{
+	system("chcp 1251>nul");
+	char Buffer[32];
+	int Number;
+	char FIO[32];
+	char Dest[32];
+	char Date[32];
+	while (true)
+	{
+		int k; gets_s(Buffer);
+		switch (atoi(Buffer))
+		{
+		case 1:
+			printf("Добавить\n");
+			printf("Номер рейса "); gets_s(Buffer); Number = atoi(Buffer);
+			printf("Фамилия     "); gets_s(FIO);
+			printf("Назначение  "); gets_s(Dest);
+			printf("Дата        "); gets_s(Date);
+			Add(Number, FIO, Dest, Date);
+			break;
+		case 2:
+			printf("Удалить\n");
+			printf("Номер   "); gets_s(Buffer); Number = atoi(Buffer);
+			printf("Фамилия "); gets_s(FIO);
+			Delete(Number, FIO);
+			break;
+		case 3:
+			printf("Найти\n");
+			printf("Номер "); gets_s(Buffer); Number = atoi(Buffer);
+			printf("Дата  "); gets_s(Date);
+			Print(Number, Date);
+			break;
+		case 4:
+			printf("Весь список\n");
+			Print(0, "");
+			break;
+		case 9:
+			return 0;
+		default:Help();
+			break;
+		}
+	}
+}
