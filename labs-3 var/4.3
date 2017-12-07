@@ -1,0 +1,107 @@
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+#include <math.h>
+
+typedef struct Point{
+	double x;
+	double y;
+} Point;
+
+Point Set1[] =
+{
+	1,1,
+	2,2,
+	3,4,
+	3,8
+};
+
+Point Set2[] =
+{
+	1,2,
+	3,5
+};
+
+typedef struct Circle
+{
+	double x;
+	double y;
+	double r;
+} Circle;
+
+//Даны два множества точек на плоскости
+//Выбрать три различные точки из первого множества так,
+//чтобы круг, ограниченный окружностью, проходящие через них,
+//содержал все точки второго множества 
+//и имел минимальную площадь
+bool InCircle(Point P, Circle C)
+{
+	double dx = C.x - P.x;
+	double dy = C.y - P.y;
+	return (dx*dx + dy*dy <= C.r*C.r);
+}
+Circle DrawCircle(Point P1, Point P2, Point P3)
+{
+	Circle Result;
+
+	double A = P2.x - P1.x;
+	double B = P2.y - P1.y;
+	double C = P3.x - P1.x;
+	double D = P3.y - P1.y;
+	double E = A * (P1.x + P2.x) + B * (P1.y + P2.y);
+	double F = C * (P1.x + P3.x) + D * (P1.y + P3.y);
+	double G = 2 * (A * (P3.y - P2.y) - B * (P3.x - P2.x));
+	if (G == 0)
+	{
+		Result.x = 0;
+		Result.y = 0;
+		Result.r = 1e99;
+	}
+	else
+	{
+		Result.x = (D * E - B * F) / G;
+		Result.y = (A * F - C * E) / G;
+		double dx = P1.x - Result.x;
+		double dy = P1.y - Result.y;
+		Result.r = sqrt(dx*dx + dy*dy);
+	}
+	return Result;
+}
+
+int main()
+{
+	system("chcp 1251>nul");
+	int N1 = sizeof(Set1) / sizeof(Point);
+	int N2 = sizeof(Set2) / sizeof(Point);
+	printf("Множество 1\n");
+	for (int i = 0; i < N1; i++) printf("%3d %6.2f %6.2f\n",i,Set1[i].x, Set1[i].y);
+	printf("Множество 2\n");
+	for (int i = 0; i < N2; i++) printf("%3d %6.2f %6.2f\n", i, Set2[i].x, Set2[i].y);
+	int i0=-1, j0=-1, k0=-1; //Решение
+	double r0 = 1E99; //Очень большой радиус
+
+	for (int i = 0; i < N1; i++)
+		for (int j = i + 1; j < N1; j++)
+			for (int k = j + 1; k < N1; k++)
+			{
+				Circle C = DrawCircle(Set1[i], Set1[j], Set1[k]);
+				int count = 0;
+				for (int c = 0; c < N2; c++)
+					if (InCircle(Set2[c], C)) count++;
+				if (count == N2)
+				{
+					if (C.r < r0)
+					{
+						i0 = i;
+						j0 = j;
+						k0 = k;
+						r0 = C.r;
+					}
+				}
+			}
+
+	printf("Это точки с номерами %d,%d,%d\n",i0,j0,k0);
+	system("pause");
+}
