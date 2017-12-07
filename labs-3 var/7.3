@@ -1,0 +1,73 @@
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+
+//Описать структуру с именем STUDENT
+//содержащую фамилию и инициалы
+//номер группы
+//успеваемость (массив из 5 элементов)
+
+const int N = 10; 
+const int M = 5; 
+
+typedef struct STUDENT
+{
+	char Name[40];
+	int Group;
+	int Mark[M];
+} STUDENT;
+
+STUDENT S[N];
+
+
+void Input()
+{
+	for (int n = 0; n < N; n++)
+	{
+		printf("Фамилия = ");
+		gets_s(S[n].Name);
+		printf("Группа = ");
+		scanf("%d", &S[n].Group);
+		printf("Оценки (%d штук) = ",M);
+		for (int m = 0; m < M; m++)
+			scanf("%d", &S[n].Mark[m]);
+		getchar();
+	}
+}
+void Sort()
+{
+	for (int k = 0; k < N; k++)
+	{
+		int min = k;
+		for (int i = k + 1; i < N; i++)
+			if (strcmp(S[i].Name, S[min].Name)) min = i;
+		STUDENT T = S[min]; S[min] = S[k]; S[k] = T;
+	}
+}
+void Filter()
+{
+	int count = 0;
+	for (int n = 0; n < N; n++)
+	{
+		for (int m = 0; m < M; m++)
+			if (S[n].Mark[m] == 2)
+			{
+				if (count==0) printf("%30s  %6s", "ФИО", "Группа");
+				printf("%30s  %6d", S[n].Name, S[n].Group);
+				count++;
+				break;
+			}
+	}
+	if (count == 0) printf("Нет двоечников\n");
+}
+
+int main()
+{
+	system("chcp 1251>nul");
+	Input();
+	Sort();
+	Filter();
+	system("pause");
+}
